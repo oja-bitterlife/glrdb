@@ -1,0 +1,35 @@
+version: 3
+
+BIN_NAME: glrdb
+
+tasks:
+  build:
+    desc: Build
+    src: .
+    cmds:
+      - go build {{src}} -o {{BIN_NAME}}
+
+  update:
+    desc: DBを更新する
+    cmds:
+      - ./{{BIN_NAME}} update
+
+  print:
+    desc: DBの内容を表示する
+    cmds:
+      - ./{{BIN_NAME}} print
+
+  clean:
+    desc: Clean
+    cmds:
+      - rm -rf {{BIN_NAME}}
+
+  tag:
+    desc: タグを更新する
+    cmds:
+      - git tag $(./{{BIN_NAME}} version)
+
+  default:
+    cmds:
+      - task --list
+
