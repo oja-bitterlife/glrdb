@@ -1,11 +1,12 @@
 version: 3
 
 env:
-  BIN_NAME: glrdb
+  BIN_NAME: "glrdb"
+  DB_NAME: "{{.BIN_NAME}}.boltdb"
 
 tasks:
   build:
-    desc: Build
+    desc: "Build"
     sources:
       - ./**/*.go
     generates:
@@ -14,29 +15,29 @@ tasks:
       - go build -o {{.BIN_NAME}}
 
   run:
-    desc: Run
+    desc: "Run"
     deps:
       - build
     cmds:
       - ./{{.BIN_NAME}}
 
   update:
-    desc: DBを更新する
+    desc: "DBを更新する"
     cmds:
       - ./{{.BIN_NAME}} update
 
   print:
-    desc: DBの内容を表示する
+    desc: "DBの内容を表示する"
     cmds:
       - ./{{.BIN_NAME}} print
 
   clean:
-    desc: Clean
+    desc: "Clean"
     cmds:
-      - rm -rf {{.BIN_NAME}}
+      - rm -rf {{.BIN_NAME}} {{.DB_NAME}}
 
   tag:
-    desc: タグを更新する
+    desc: "タグを更新する"
     cmds:
       - git tag $(./{{.BIN_NAME}} version)
 
