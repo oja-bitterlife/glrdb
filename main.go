@@ -14,14 +14,20 @@ const version = "0.1.0"
 const (
 	// データベースのファイル名
 	dbFileName = "glrdb.db"
+	// コンフィグのファイル名
+	configFileName = "glrdb.toml"
 )
 
 type Config struct {
-	Paths []string `toml:"path"`
+	Sources []Source `toml:"sources"`
+}
+
+type Source struct {
+	Paths string `toml:"path"`
 }
 
 func loadConfig() (*Config, error) {
-	data, err := os.ReadFile(dbFileName)
+	data, err := os.ReadFile(configFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +46,6 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("Version: %s\n", version)
-	fmt.Printf("Loaded paths: %v\n", config.Paths)
+	// debug print config
+	fmt.Printf("Loaded config: %+v\n", config)
 }
