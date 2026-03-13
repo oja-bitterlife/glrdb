@@ -15,8 +15,6 @@ import (
 const version = "0.1.0"
 
 const (
-	// データベースのファイル名
-	dbFileName = "glrdb.boltdb"
 	// コンフィグのファイル名
 	configFileName = "glrdb.toml"
 )
@@ -42,8 +40,8 @@ func fetchDescription(repoPath string) string {
 	// Bareなので直接ファイルは読めないため git コマンドを使う
 	cmd := exec.Command("git", "-C", repoPath, "show", "HEAD:README.md")
 	if out, err := cmd.Output(); err == nil {
-		lines := strings.Split(string(out), "\n")
-		for _, line := range lines {
+		lines := strings.SplitSeq(string(out), "\n")
+		for line := range lines {
 			l := strings.TrimSpace(line)
 			if l != "" && !strings.HasPrefix(l, "#") {
 				return l // 最初の意味のある行
@@ -116,18 +114,18 @@ func scanRepositories(db *bbolt.DB, config *Config) error {
 }
 
 func main() {
-	config, err := LoadConfig(configFileName)
+	config, err := noadConfig(configFileName)
 	if err != nil {
 		panic(err)
 	}
 
-	db, err := bbolt.Open(dbFileName, 0600, nil)
+	db, err := bbolt.Open(config.DBName, 0600, nil)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	err = scanRepositories(db, config)
+	err = scanDir(db, config)
 	if err != nil {
 		panic(err)
 	}

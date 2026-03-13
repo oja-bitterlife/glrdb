@@ -7,29 +7,36 @@ import (
 )
 
 type Config struct {
+	DBName    string   `toml:"db_name"` // データベースファイル名
 	Sources   []Source `toml:"sources"`
 	Blacklist []string `toml:"blacklist"` // node_modules などをここに追加予定
+	MaxDepth  int      `toml:"max_depth"` // デフォルトは64、必要に応じて変更可能
 }
 
 type Source struct {
 	Path string `toml:"path"`
 }
 
-func LoadConfig(path string) (*Config, error) {
+func newDefaultConfig() *Config {
+	return &Config{
+		DBName:   "glrdb.boltdb",
+		MaxDepth: 64,
+		// とりあえずデフォルトを手入力
+		Blacklist: []string{"node_modules", "vendor"},
+	}
+}
+
+func loadConfig(path string) (*Config, error) {
+	config := newDefaultConfig()
+
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var config Config
-	if err := toml.Unmarshal(data, &config); err != nil {
+	if err := toml.Unmarshal(data, config); err != nil {
 		return nil, err
 	}
 
-	// とりあえず手入力しておく
-	if len(config.Blacklist) == 0 {
-		config.Blacklist = []string{"node_modules", "vendor"}
-	}
-
-	return &config, nil
+	return config, nil
 }
