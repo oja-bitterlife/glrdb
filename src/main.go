@@ -34,4 +34,6 @@ func main() {
 	if err = updateDB(config, allRepos); err != nil {
 		panic(err)
 	}
+
+	printForFzf(config)
 }
