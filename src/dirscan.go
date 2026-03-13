@@ -24,7 +24,6 @@ func scanDir(config *Config) ([]string, error) {
 	var allRepos []string
 
 	for _, src := range config.Sources {
-		fmt.Printf("Scanning: %s\n", src.Path)
 		repos, err := rec_scanDir(src.Path, 0, config)
 		if err != nil {
 			return nil, err
@@ -34,18 +33,38 @@ func scanDir(config *Config) ([]string, error) {
 		}
 	}
 
-	// debug
-	fmt.Printf("Total repositories found: %#v\n", allRepos)
-
 	return allRepos, nil
 }
 
 func rec_scanDir(path string, depth int, config *Config) ([]string, error) {
-	var foundRepos []string
+	fmt.Printf("Scanning: %s\n", path)
+	filebase := filepath.Base(path)
 
+	// チェックしているディレクトリがどんなディテクトリかチェック
+	// ----------------------------------------
+	// 深さ制限のチェック
 	if depth > config.MaxDepth {
 		return nil, fmt.Errorf("max depth exceeded at: %s", path)
 	}
+
+	// 通常リポジトリは今はスキップする
+	if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
+		return nil, nil
+	}
+
+	// スキップ判定（ドット、blacklist）
+	if strings.HasPrefix(filebase, ".") || isBlacklisted(filebase, config.Blacklist) {
+		return nil, nil
+	}
+
+	// リポジトリ判定
+	if isBareRepo(path) {
+		return []string{path}, nil
+	}
+
+	// ディレクトリ内を走査(再帰呼び出し)
+	// ----------------------------------------
+	var foundRepos []string
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -70,19 +89,6 @@ func rec_scanDir(path string, depth int, config *Config) ([]string, error) {
 		}
 
 		if info.IsDir() {
-			name := entry.Name()
-
-			// スキップ判定（ドット、blacklist）
-			if strings.HasPrefix(name, ".") || isBlacklisted(name, config.Blacklist) {
-				continue
-			}
-
-			// リポジトリ判定
-			if isBareRepo(fullPath) {
-				foundRepos = append(foundRepos, fullPath)
-				continue // リポジトリの中は掘らない
-			}
-
 			// 再帰呼び出しの結果をマージする
 			subRepos, err := rec_scanDir(fullPath, depth+1, config)
 			if err != nil {
@@ -91,5 +97,5 @@ func rec_scanDir(path string, depth int, config *Config) ([]string, error) {
 			foundRepos = append(foundRepos, subRepos...)
 		}
 	}
-	return nil
+	return foundRepos, nil
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -52,69 +51,8 @@ func fetchDescription(repoPath string) string {
 	return "No description"
 }
 
-func isBareRepo(path string) bool {
-	_, errObjects := os.Stat(filepath.Join(path, "objects"))
-	_, errRefs := os.Stat(filepath.Join(path, "refs"))
-	_, errConfig := os.Stat(filepath.Join(path, "config"))
-	_, errHead := os.Stat(filepath.Join(path, "HEAD"))
-	return errObjects == nil && errRefs == nil && errConfig == nil && errHead == nil
-}
-func scanRepositories(db *bbolt.DB, config *Config) error {
-	return db.Update(func(tx *bbolt.Tx) error {
-		// バケット（テーブルのようなもの）の準備
-		b, err := tx.CreateBucketIfNotExists([]byte("repos"))
-		if err != nil {
-			return err
-		}
-
-		for _, src := range config.Sources {
-			fmt.Printf("Scanning: %s\n", src.Path)
-
-			// ここで走査を開始
-			filepath.WalkDir(src.Path, func(path string, d os.DirEntry, err error) error {
-				if err != nil || !d.IsDir() {
-					return nil
-				}
-
-				// 高速化のため、いくつかのディレクトリをスキップ
-				// ----------------------------------------
-				name := d.Name()
-
-				// ドットで始まるディレクトリはスキップ
-				if strings.HasPrefix(d.Name(), ".") {
-					return filepath.SkipDir
-				}
-				// node_modulesとか、普通のディレクトリ名でドンと居座るのやめて(´・ω:;.:...
-				if name == "node_modules" || name == "vendor" {
-					return filepath.SkipDir
-				}
-
-				// Bareリポジトリを見つけたら
-				if isBareRepo(path) {
-					fmt.Printf("Found Bare Repo: %s\n", path)
-
-					repo := Repository{
-						Path: path,
-						Name: name,
-						// description取得は一旦スタブ（仮）でもOK
-						Description: "Sample description",
-					}
-
-					// JSONにして保存
-					v, _ := json.Marshal(repo)
-					b.Put([]byte(path), v)
-
-					return filepath.SkipDir // リポジトリの中までは掘らない
-				}
-				return nil
-			})
-		}
-		return nil
-	})
-}
-
 func main() {
-	config, err := noadConfig(configFileName)
+	config, err := loadConfig(configFileName)
 	if err != nil {
 		panic(err)
 	}
@@ -125,8 +63,12 @@ func main() {
 	}
 	defer db.Close()
 
-	err = scanDir(db, config)
+	allRepos, err := scanDir(config)
 	if err != nil {
 		panic(err)
 	}
+
+	// debug
+	fmt.Printf("Total repositories found: %#v\n", allRepos)
+
 }
