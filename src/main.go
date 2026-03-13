@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	"go.etcd.io/bbolt"
 )
 
 // バージョンは頻繁に書き換えるので個別で定数化しておく
@@ -26,21 +24,14 @@ func main() {
 		panic(err)
 	}
 
-	db, err := bbolt.Open(config.DBName, 0600, nil)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
 	allRepos, err := scanDir(config)
 	if err != nil {
 		panic(err)
 	}
 
-	// debug
-	fmt.Printf("Total repositories found: %#v\n", allRepos)
+	fmt.Printf("--- start fetching description ---\n")
 
-	for _, repoPath := range allRepos {
-		fetchReadme(repoPath)
+	if err = updateDB(config, allRepos); err != nil {
+		panic(err)
 	}
 }
