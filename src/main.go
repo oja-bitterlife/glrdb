@@ -41,7 +41,6 @@ func main() {
 	fmt.Printf("Total repositories found: %#v\n", allRepos)
 
 	for _, repoPath := range allRepos {
-		desc := fetchReadme(repoPath)
-		fmt.Printf("Repository: %s\nDescription: %s\n\n", repoPath, desc)
+		fetchReadme(repoPath)
 	}
 }
