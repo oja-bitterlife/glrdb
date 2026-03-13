@@ -8,11 +8,11 @@ tasks:
   build:
     desc: "Build"
     sources:
-      - ./**/*.go
+      - src/**/*.go
     generates:
       - "{{.BIN_NAME}}"
     cmds:
-      - go build -o {{.BIN_NAME}}
+      - go build -o {{.BIN_NAME}} ./src
 
   run:
     desc: "Run"
