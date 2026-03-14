@@ -61,7 +61,7 @@ func main() {
 			// printコマンドはデータベースからリポジトリ情報を取得してfzf向けに出力する
 			{
 				Name:  "print",
-				Usage: "Print repository information in a format suitable for fzf",
+				Usage: "Print repository information in a format suitable for fzf\nEXAMPLE (fzf integration):\n  glrdb print | fzf --delimiter '\\t' --with-nth 1 --preview 'echo {2} | base64 -d' | cut -f1",
 				Action: func(ctx *cli.Context) error {
 					if config, err := loadConfig(ctx.String("config")); err != nil {
 						return err
