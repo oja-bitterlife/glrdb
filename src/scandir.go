@@ -67,7 +67,7 @@ func rec_scanDir(path string, depth int, config *Config, src *SourceSection) ([]
 	}
 
 	// スキップ判定（ドット、blacklist）
-	if strings.HasPrefix(filebase, ".") || isExclude(filebase, config, src) {
+	if (depth > 0 && strings.HasPrefix(filebase, ".")) || isExclude(filebase, config, src) {
 		fmt.Printf("Skip: %s\n", path)
 		return nil, nil
 	}
