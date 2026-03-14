@@ -9,6 +9,10 @@ import (
 )
 
 // **********************************************************************
+func findMesage(path repoPath, hitFile string) {
+	fmt.Printf("%s: %s\n", path.path, hitFile)
+}
+
 // リポジトリのdescriptionかREADME.mdを取得する
 func fetchReadme(path repoPath) string {
 	var gitPathArg []string
@@ -19,7 +23,7 @@ func fetchReadme(path repoPath) string {
 			desc := strings.TrimSpace(string(data))
 			// Gitデフォルトの文言でなければ採用
 			if desc != "" && !strings.Contains(desc, "Unnamed repository") {
-				fmt.Printf("Found description file in %s\n", path.path)
+				findMesage(path, "description")
 				return desc
 			}
 		}
@@ -55,14 +59,15 @@ func fetchReadme(path repoPath) string {
 
 	// 特定したファイル名で中身を取得
 	if targetFile != "" {
-		fmt.Printf("%s: %s found\n", path.path, targetFile)
+		findMesage(path, targetFile)
+
 		gitArgs := append(gitPathArg, "show", "HEAD:"+targetFile)
 		cmd := exec.Command("git", gitArgs...)
 		if out, err = cmd.Output(); err == nil {
 			return string(out)
 		}
 	} else {
-		fmt.Printf("%s: No description\n", path.path)
+		fmt.Printf("%s:\n", path.path)
 	}
 
 	return ""
