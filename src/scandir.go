@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+type repoPath struct {
+	path   string
+	isBare bool
+}
+
 func isBlacklisted(name string, blacklist []string) bool {
 	return slices.Contains(blacklist, name)
 }
@@ -20,8 +25,8 @@ func isBareRepo(path string) bool {
 	return errObjects == nil && errRefs == nil && errConfig == nil && errHead == nil
 }
 
-func scanDir(config *Config) ([]string, error) {
-	var allRepos []string
+func scanDir(config *Config) ([]repoPath, error) {
+	var allRepos []repoPath
 
 	for _, src := range config.Sources {
 		repos, err := rec_scanDir(src.Path, 0, config)
@@ -36,7 +41,7 @@ func scanDir(config *Config) ([]string, error) {
 	return allRepos, nil
 }
 
-func rec_scanDir(path string, depth int, config *Config) ([]string, error) {
+func rec_scanDir(path string, depth int, config *Config) ([]repoPath, error) {
 	fmt.Printf("Enter: %s\n", path)
 	filebase := filepath.Base(path)
 
@@ -49,7 +54,7 @@ func rec_scanDir(path string, depth int, config *Config) ([]string, error) {
 
 	// 通常リポジトリは今はスキップする
 	if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
-		return nil, nil
+		return []repoPath{{path: path, isBare: false}}, nil
 	}
 
 	// スキップ判定（ドット、blacklist）
@@ -59,12 +64,12 @@ func rec_scanDir(path string, depth int, config *Config) ([]string, error) {
 
 	// リポジトリ判定
 	if isBareRepo(path) {
-		return []string{path}, nil
+		return []repoPath{{path: path, isBare: true}}, nil
 	}
 
 	// ディレクトリ内を走査(再帰呼び出し)
 	// ----------------------------------------
-	var foundRepos []string
+	var foundRepos []repoPath
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
