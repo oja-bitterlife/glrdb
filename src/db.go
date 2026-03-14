@@ -6,19 +6,25 @@ import (
 	"go.etcd.io/bbolt"
 )
 
+// **********************************************************************
+// データベース関連の構造体
 type Repository struct {
 	Path        string `json:"path"`
 	IsBare      bool   `json:"is_bare"`
 	Description string `json:"description"`
 }
 
+// **********************************************************************
+// データベースの更新
 func updateDB(config *Config, repos []repoPath) error {
+	// データベースを開く（存在しない場合は新規作成）
 	db, err := bbolt.Open(config.Global.DBName, 0644, nil)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
+	// トランザクションを開始してデータベースを更新
 	return db.Update(func(tx *bbolt.Tx) error {
 		// バケット作成
 		bucket, err := tx.CreateBucketIfNotExists([]byte("Repositories"))
@@ -26,18 +32,20 @@ func updateDB(config *Config, repos []repoPath) error {
 			return err
 		}
 
+		// リポジトリごとにデータを保存
 		for _, path := range repos {
-			// 前に作った fetchReadme を使用
-			desc := fetchReadme(path)
 			repo := Repository{
 				Path:        path.path,
 				IsBare:      path.isBare,
-				Description: desc,
+				Description: fetchReadme(path),
 			}
 
-			data, _ := json.Marshal(repo)
-			if err := bucket.Put([]byte(path.path), data); err != nil {
+			if data, err := json.Marshal(repo); err != nil {
 				return err
+			} else {
+				if err := bucket.Put([]byte(path.path), data); err != nil {
+					return err
+				}
 			}
 		}
 		return nil

@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// **********************************************************************
+// リポジトリのdescriptionかREADME.mdを取得する
 func fetchReadme(path repoPath) string {
 	var gitPathArg []string
 
@@ -52,13 +54,15 @@ func fetchReadme(path repoPath) string {
 	}
 
 	// 特定したファイル名で中身を取得
-	fmt.Printf("Looking for README in %s, target: %s\n", path.path, targetFile)
 	if targetFile != "" {
+		fmt.Printf("%s: %s found\n", path.path, targetFile)
 		gitArgs := append(gitPathArg, "show", "HEAD:"+targetFile)
 		cmd := exec.Command("git", gitArgs...)
 		if out, err = cmd.Output(); err == nil {
 			return string(out)
 		}
+	} else {
+		fmt.Printf("%s: No description\n", path.path)
 	}
 
 	return ""

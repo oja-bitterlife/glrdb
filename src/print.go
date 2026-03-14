@@ -9,6 +9,8 @@ import (
 	"go.etcd.io/bbolt"
 )
 
+// **********************************************************************
+// リポジトリ情報をタブ区切りでbase64で出力する
 func printForFzf(config *Config) error {
 	db, err := bbolt.Open(config.Global.DBName, 0666, nil) // 読み込みなので 0666
 	if err != nil {
@@ -36,6 +38,8 @@ func printForFzf(config *Config) error {
 	})
 }
 
+// **********************************************************************
+// リポジトリ情報をsummary形式で出力する
 func printList(config *Config) error {
 	db, err := bbolt.Open(config.Global.DBName, 0666, nil) // 読み込みなので 0666
 	if err != nil {
@@ -53,13 +57,24 @@ func printList(config *Config) error {
 			var repo Repository
 			json.Unmarshal(value, &repo)
 
-			// READMEの中身を改行除去して1行に短縮
-			summary := strings.ReplaceAll(repo.Description, "\n", " ")
+			summary := repo.Description
+			if summary == "" {
+				summary = "(No description)"
+			}
+
+			// 改行を<br>に
+			summary = strings.ReplaceAll(summary, "\r\n", "\n")
+			summary = strings.ReplaceAll(summary, "\r", "\n")
+			summary = strings.ReplaceAll(summary, "\n", " ")
+
+			// 連続するスペースを1つのスペースにして、前後のスペースを削除
+			strings.Join(strings.Fields(summary), " ")
+
+			// それでも長いときは切る
 			if len(summary) > 80 {
 				summary = summary[:80] + "..."
 			}
 
-			// タブ区切りで出力（fzfで扱いやすい）
 			fmt.Printf("%s: %s\n", repo.Path, summary)
 			return nil
 		})
