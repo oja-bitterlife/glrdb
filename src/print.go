@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -25,14 +26,11 @@ func printForFzf(config *Config) error {
 			var repo Repository
 			json.Unmarshal(value, &repo)
 
-			// READMEの中身を改行除去して1行に短縮（fzfで見やすくするため）
-			summary := strings.ReplaceAll(repo.Description, "\n", " ")
-			// if len(summary) > 100 {
-			// 	summary = summary[:100] + "..."
-			// }
+			// base64エンコードして出力
+			content := base64.StdEncoding.EncodeToString([]byte(repo.Description))
 
 			// タブ区切りで出力（fzfで扱いやすい）
-			fmt.Printf("%s\t%s\n", repo.Path, summary)
+			fmt.Printf("%s\t%s\n", repo.Path, content)
 			return nil
 		})
 	})
