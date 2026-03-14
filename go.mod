@@ -1,4 +1,4 @@
-module glrdb
+module github.com/oja-bitterlife/glrdb
 
 go 1.25.8
 
