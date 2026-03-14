@@ -26,7 +26,6 @@ tasks:
     deps:
       - build
     cmds:
-#      - ./{{.BIN_NAME}} print | fzf --delimiter '\t' --with-nth 1 --preview 'echo {2} | base64 -d' --preview-window 'right:50%:wrap'
       - ./{{.BIN_NAME}} print | fzf --delimiter '\t' --with-nth 1 --preview 'echo {2} | base64 -d' | cut -f1
 
   list:
@@ -35,6 +34,21 @@ tasks:
       - build
     cmds:
       - ./{{.BIN_NAME}} list
+  
+  init:
+    desc: "tomlファイルの初期値を生成する"
+    deps:
+      - build
+    cmds:
+      - ./{{.BIN_NAME}} init
+
+  help:
+    desc: "ヘルプを表示する"
+    deps:
+      - build
+    cmds:
+      - ./{{.BIN_NAME}} help
+
 
   clean:
     desc: "Clean"

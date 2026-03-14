@@ -59,7 +59,6 @@ func expandHome(path string) string {
 		return filepath.Join(home, path[2:])
 	}
 
-	// "~" 単体の場合
 	return home
 }
 
@@ -67,10 +66,26 @@ func expandHome(path string) string {
 // Configファイルの読み込み
 func loadConfig(path string) (*Config, error) {
 	config := newDefaultConfig()
+	var data []byte
 
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+	// 引数で指定されたパスがあればそこから読み込む
+	if path != "" {
+		d, err := os.ReadFile(path)
+		if err != nil {
+			// 引数で指定されたパスが見つからない場合はエラー
+			return nil, err
+		} else {
+			data = d
+		}
+	} else {
+		// 引数がない場合はカレントディレクトリgのglrdb.toml をチェック
+		d, err := os.ReadFile(defaultConfigName)
+		if err != nil {
+			// .config下は今はみない
+			return nil, err
+		} else {
+			data = d
+		}
 	}
 
 	if err := toml.Unmarshal(data, config); err != nil {

@@ -15,6 +15,18 @@ const version = "0.1.0"
 const (
 	// コンフィグのファイル名
 	defaultConfigName = "glrdb.toml"
+	defaultConfigToml = `# Default configuration for glrdb
+# To create this file, run: glrdb init > %s
+
+[global]
+#db_name = "glrdb.db"
+#max_depth = 64
+exclude = ["node_modules", "vendor"]
+
+[[sources]]
+path = "./"
+#exclude = []
+`
 )
 
 func main() {
@@ -27,7 +39,6 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "config",
-				Value:   defaultConfigName,
 				Aliases: []string{"f"},
 				Usage:   "Path to the config file (default: glrdb.toml)",
 			},
@@ -83,6 +94,16 @@ func main() {
 						printList(config)
 						return nil
 					}
+				},
+			},
+
+			// initコマンドはデフォルトのコンフィグファイルを出力する
+			{
+				Name:  "init",
+				Usage: "Generate a default config file (TOML)",
+				Action: func(c *cli.Context) error {
+					fmt.Printf(defaultConfigToml, defaultConfigName)
+					return nil
 				},
 			},
 		},
