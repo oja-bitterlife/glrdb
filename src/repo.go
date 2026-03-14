@@ -10,7 +10,6 @@ import (
 
 type Repository struct {
 	Path        string `json:"path"`
-	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 

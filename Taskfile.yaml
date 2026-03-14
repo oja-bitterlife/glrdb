@@ -27,6 +27,13 @@ tasks:
       - build
     cmds:
       - ./{{.BIN_NAME}} print
+  
+  list:
+    desc: "DBの内容を表示する"
+    deps:
+      - build
+    cmds:
+      - ./{{.BIN_NAME}} list
 
   clean:
     desc: "Clean"

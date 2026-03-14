@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 
 	"go.etcd.io/bbolt"
 )
@@ -28,7 +27,6 @@ func updateDB(config *Config, repos []string) error {
 			desc := fetchReadme(path)
 			repo := Repository{
 				Path:        path,
-				Name:        filepath.Base(path),
 				Description: desc,
 			}
 
