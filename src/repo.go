@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+type Repository struct {
+	Path        string `json:"path"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 func fetchReadme(path string) string {
 	// descriptionファイルがあれば優先
 	if data, err := os.ReadFile(filepath.Join(path, "description")); err == nil {

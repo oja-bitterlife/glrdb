@@ -14,20 +14,17 @@ tasks:
     cmds:
       - go build -o {{.BIN_NAME}} ./src
 
-  run:
-    desc: "Run"
-    deps:
-      - build
-    cmds:
-      - ./{{.BIN_NAME}}
-
   update:
     desc: "DBを更新する"
+    deps:
+      - build
     cmds:
       - ./{{.BIN_NAME}} update
 
   print:
     desc: "DBの内容を表示する"
+    deps:
+      - build
     cmds:
       - ./{{.BIN_NAME}} print
 
