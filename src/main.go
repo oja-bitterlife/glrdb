@@ -8,6 +8,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// **********************************************************************
+// アプリケーションの定義
 // バージョンは頻繁に書き換えるので個別で定数化しておく
 const version = "0.1.0"
 
@@ -15,6 +17,7 @@ const version = "0.1.0"
 const (
 	// コンフィグのファイル名
 	defaultConfigName = "glrdb.toml"
+	// デフォルトのコンフィグファイルの内容
 	defaultConfigToml = `# Default configuration for glrdb
 # To create this file, run: glrdb init > %s
 
@@ -27,8 +30,12 @@ exclude = ["node_modules", "vendor"]
 path = "./"
 #exclude = []
 `
+	// Printコマンドのfzf連携Usage用メッセージ
+	fzfUsage = "EXAMPLE (fzf integration):\n  glrdb print | fzf --delimiter '\\t' --with-nth 1 --preview 'echo {2} | base64 -d' | cut -f1"
 )
 
+// **********************************************************************
+// main関数。基本はオプションチェック
 func main() {
 	app := &cli.App{
 		Name:    "glrdb",
@@ -72,7 +79,7 @@ func main() {
 			// printコマンドはデータベースからリポジトリ情報を取得してfzf向けに出力する
 			{
 				Name:  "print",
-				Usage: "Print repository information in a format suitable for fzf\nEXAMPLE (fzf integration):\n  glrdb print | fzf --delimiter '\\t' --with-nth 1 --preview 'echo {2} | base64 -d' | cut -f1",
+				Usage: "Print repository information in a format suitable for fzf\n" + fzfUsage,
 				Action: func(ctx *cli.Context) error {
 					if config, err := loadConfig(ctx.String("config")); err != nil {
 						return err
