@@ -1,5 +1,5 @@
 .task/
-glrdb
+bin/
 *.boltdb
 glrdb.toml
 *.bk
