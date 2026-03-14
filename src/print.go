@@ -58,9 +58,6 @@ func printList(config *Config) error {
 			json.Unmarshal(value, &repo)
 
 			summary := repo.Description
-			if summary == "" {
-				summary = "(No description)"
-			}
 
 			// 改行を<br>に
 			summary = strings.ReplaceAll(summary, "\r\n", "\n")

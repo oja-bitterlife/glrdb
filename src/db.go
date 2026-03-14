@@ -26,6 +26,9 @@ func updateDB(config *Config, repos []repoPath) error {
 
 	// トランザクションを開始してデータベースを更新
 	return db.Update(func(tx *bbolt.Tx) error {
+		// いったん全クリア
+		tx.DeleteBucket([]byte("Repositories"))
+
 		// バケット作成
 		bucket, err := tx.CreateBucketIfNotExists([]byte("Repositories"))
 		if err != nil {
