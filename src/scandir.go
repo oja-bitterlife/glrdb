@@ -73,6 +73,7 @@ func rec_scanDir(path string, depth int, config *Config) ([]repoPath, error) {
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
+		fmt.Printf("Warning: cannot read directory %s: %v\n", path, err)
 		return nil, nil // アクセス権限エラーなどは無視
 	}
 
