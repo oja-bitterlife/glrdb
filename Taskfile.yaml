@@ -10,7 +10,7 @@ tasks:
   build:
     desc: "Build"
     sources:
-      - src/**/*.go
+      - ./{{.APP_NAME}}/**/*.go
     generates:
       - "{{.BIN_PATH}}"
     cmds:
