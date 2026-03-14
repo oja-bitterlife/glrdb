@@ -59,6 +59,7 @@ tasks:
     desc: "タグを更新する"
     cmds:
       - git tag $(./{{.BIN_NAME}} version)
+      - git tag
 
   default:
     cmds:
