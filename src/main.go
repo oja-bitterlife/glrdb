@@ -11,7 +11,7 @@ import (
 // **********************************************************************
 // アプリケーションの定義
 // バージョンは頻繁に書き換えるので個別で定数化しておく
-const version = "0.1.0"
+const version = "v0.1.0"
 
 // Default定数
 const (
@@ -53,6 +53,16 @@ func main() {
 
 		// サブコマンド
 		Commands: []*cli.Command{
+			// versionコマンドはバージョン情報を表示する
+			{
+				Name:  "version",
+				Usage: "Show the version of glrdb",
+				Action: func(c *cli.Context) error {
+					fmt.Printf("%s\n", version)
+					return nil
+				},
+			},
+
 			// updateコマンドはリポジトリのスキャンとデータベースの更新を行う
 			{
 				Name:  "update",
