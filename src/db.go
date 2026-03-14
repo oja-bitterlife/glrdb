@@ -13,7 +13,7 @@ type Repository struct {
 }
 
 func updateDB(config *Config, repos []repoPath) error {
-	db, err := bbolt.Open(config.Global.DBName, 0600, nil)
+	db, err := bbolt.Open(config.Global.DBName, 0644, nil)
 	if err != nil {
 		return err
 	}
