@@ -1,5 +1,9 @@
+[global]
+exclude = ["node_modules", "vendor"]
+
 [[sources]]
 path = "/mnt/y"
+exclude = ["春華v2"]
 
 [[sources]]
 path = "~/Documents/work"

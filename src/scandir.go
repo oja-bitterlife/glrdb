@@ -8,15 +8,26 @@ import (
 	"strings"
 )
 
+// **********************************************************************
+// リポジトリのパスとタイプを保持する構造体
 type repoPath struct {
 	path   string
 	isBare bool
 }
 
-func isBlacklisted(name string, blacklist []string) bool {
-	return slices.Contains(blacklist, name)
+// **********************************************************************
+// リポジトリスキャン関連の関数
+// ==================================================
+// スキャン対象から除外するかどうかの判定
+func isExclude(basename string, config *Config, src *SourceSection) bool {
+	if slices.Contains(config.Global.Excludes, basename) || slices.Contains(src.Excludes, basename) {
+		return true
+	}
+	return false
 }
 
+// ==================================================
+// ベアリポジトリかどうかの判定
 func isBareRepo(path string) bool {
 	_, errObjects := os.Stat(filepath.Join(path, "objects"))
 	_, errRefs := os.Stat(filepath.Join(path, "refs"))
@@ -25,11 +36,13 @@ func isBareRepo(path string) bool {
 	return errObjects == nil && errRefs == nil && errConfig == nil && errHead == nil
 }
 
+// **********************************************************************
+// ディレクトリをスキャンしてリポジトリを見つける
 func scanDir(config *Config) ([]repoPath, error) {
 	var allRepos []repoPath
 
 	for _, src := range config.Sources {
-		repos, err := rec_scanDir(src.Path, 0, config)
+		repos, err := rec_scanDir(src.Path, 0, config, &src)
 		if err != nil {
 			return nil, err
 		}
@@ -41,25 +54,30 @@ func scanDir(config *Config) ([]repoPath, error) {
 	return allRepos, nil
 }
 
-func rec_scanDir(path string, depth int, config *Config) ([]repoPath, error) {
-	fmt.Printf("Enter: %s\n", path)
+// ==================================================
+// 再帰的にディレクトリをスキャンする
+func rec_scanDir(path string, depth int, config *Config, src *SourceSection) ([]repoPath, error) {
 	filebase := filepath.Base(path)
 
 	// チェックしているディレクトリがどんなディテクトリかチェック
 	// ----------------------------------------
 	// 深さ制限のチェック
-	if depth > config.MaxDepth {
+	if depth > config.Global.MaxDepth {
 		return nil, fmt.Errorf("max depth exceeded at: %s", path)
 	}
 
-	// 通常リポジトリは今はスキップする
-	if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
-		return []repoPath{{path: path, isBare: false}}, nil
+	// スキップ判定（ドット、blacklist）
+	if strings.HasPrefix(filebase, ".") || isExclude(filebase, config, src) {
+		fmt.Printf("Skip: %s\n", path)
+		return nil, nil
 	}
 
-	// スキップ判定（ドット、blacklist）
-	if strings.HasPrefix(filebase, ".") || isBlacklisted(filebase, config.Blacklist) {
-		return nil, nil
+	// ここからはスキャン対象のディレクトリ
+	fmt.Printf("Enter: %s\n", path)
+
+	// 通常リポジトリ
+	if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
+		return []repoPath{{path: path, isBare: false}}, nil
 	}
 
 	// リポジトリ判定
@@ -94,9 +112,11 @@ func rec_scanDir(path string, depth int, config *Config) ([]repoPath, error) {
 			info, _ = os.Stat(fullPath)
 		}
 
+		// ディレクトリであれば再帰的にスキャンする
+		// ----------------------------------------
 		if info.IsDir() {
 			// 再帰呼び出しの結果をマージする
-			subRepos, err := rec_scanDir(fullPath, depth+1, config)
+			subRepos, err := rec_scanDir(fullPath, depth+1, config, src)
 			if err != nil {
 				return nil, err
 			}

@@ -10,7 +10,7 @@ import (
 )
 
 func printForFzf(config *Config) error {
-	db, err := bbolt.Open(config.DBName, 0666, nil) // 読み込みなので 0666
+	db, err := bbolt.Open(config.Global.DBName, 0666, nil) // 読み込みなので 0666
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func printForFzf(config *Config) error {
 }
 
 func printList(config *Config) error {
-	db, err := bbolt.Open(config.DBName, 0666, nil) // 読み込みなので 0666
+	db, err := bbolt.Open(config.Global.DBName, 0666, nil) // 読み込みなので 0666
 	if err != nil {
 		return err
 	}
