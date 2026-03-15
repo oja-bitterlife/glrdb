@@ -10,12 +10,12 @@ tasks:
   build:
     desc: "Build"
     sources:
-      - ./{{.APP_NAME}}/**/*.go
+      - ./*.go
     generates:
       - "{{.BIN_PATH}}"
     cmds:
       - mkdir -p {{.BIN_DIR}}
-      - go build -o {{.BIN_PATH}} ./{{.APP_NAME}}
+      - go build -o {{.BIN_PATH}} .
 
   update:
     desc: "DBを更新する"
